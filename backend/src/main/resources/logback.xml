@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ==================== 日志文件存储路径 ==================== -->
+    <!-- 日志文件统一放在 backend/logs 目录里 -->
+    <property name="LOG_PATH" value="logs"/>
+    <!-- 应用名称，用于日志文件命名 -->
+    <property name="APP_NAME" value="my-bilibili"/>
+
+    <!-- ==================== 控制台输出格式 ==================== -->
+    <!--
+        格式说明：
+        %d{yyyy-MM-dd HH:mm:ss.SSS}  - 时间戳，精确到毫秒
+        [%thread]                     - 线程名
+        %highlight(%-5level)          - 日志级别，左对齐5字符，带颜色高亮
+        %cyan(%logger{36})            - Logger名称（类名），最长36字符，青色
+        [%X{traceId}]                 - MDC中的traceId，用于全链路追踪
+        - %msg%n                      - 日志消息 + 换行
+    -->
+    <property name="CONSOLE_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) [%X{traceId}] - %msg%n"/>
+
+    <!-- ==================== 文件输出格式 ==================== -->
+    <!-- 文件日志格式和控制台一样，但不使用颜色高亮（文件中颜色码会乱码） -->
+    <property name="FILE_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{traceId}] - %msg%n"/>
+
+    <!-- ==================== 控制台Appender ==================== -->
+    <!-- 日志同时输出到控制台 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_PATTERN}</pattern>
+            <!-- 使用UTF-8编码，防止中文乱码 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 滚动文件Appender ==================== -->
+    <!-- 日志同时输出到文件，按天自动生成新文件，只保留30天日志 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志文件路径 -->
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <!-- 滚动策略：按天滚动 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 归档日志文件名格式，按天生成新文件 -->
+            <!-- 例如：my-bilibili.2024-01-15.log -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 只保留30天的日志文件，超过30天的自动删除 -->
+            <maxHistory>30</maxHistory>
+            <!-- 日志文件总大小上限，超过后删除最旧的日志 -->
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+            <!-- 使用UTF-8编码，防止中文乱码 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 错误日志单独输出 ==================== -->
+    <!-- ERROR级别的日志单独输出到一个文件，方便排查问题 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <!-- 只记录ERROR级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 日志级别配置 ==================== -->
+
+    <!-- 全局默认只打印INFO级别 -->
+    <root level="INFO">
+        <!-- 同时输出到控制台和文件 -->
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+    <!-- 在 io.github.fantasticname.mybilibili 包下开启DEBUG级别日志 -->
+    <!-- 这样项目自身的代码会输出更详细的日志，方便开发调试 -->
+    <logger name="io.github.fantasticname.mybilibili" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </logger>
+
+</configuration>
