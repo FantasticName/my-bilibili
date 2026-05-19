@@ -55,7 +55,42 @@ public enum ErrorCode {
     /**
      * 操作失败
      */
-    OPERATION_ERROR(50001, "操作失败");
+    OPERATION_ERROR(50001, "操作失败"),
+
+    /**
+     * 手机号已注册
+     */
+    PHONE_ALREADY_REGISTERED(40001, "手机号已注册"),
+
+    /**
+     * 密码不一致
+     */
+    PASSWORD_NOT_MATCH(40002, "两次输入的密码不一致"),
+
+    /**
+     * 手机号或密码错误
+     */
+    PHONE_OR_PASSWORD_ERROR(40102, "手机号或密码错误"),
+
+    /**
+     * 账号已被封禁
+     */
+    ACCOUNT_BANNED(40301, "账号已被封禁"),
+
+    /**
+     * 邀请码错误
+     */
+    INVITE_CODE_ERROR(40003, "邀请码错误"),
+
+    /**
+     * 旧密码错误
+     */
+    OLD_PASSWORD_ERROR(40004, "旧密码错误"),
+
+    /**
+     * 文件上传失败
+     */
+    UPLOAD_ERROR(50002, "文件上传失败");
 
     /**
      * 状态码

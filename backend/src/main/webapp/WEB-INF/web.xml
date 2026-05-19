@@ -42,6 +42,17 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- ==================== AuthFilter ==================== -->
+    <!-- 负责在请求处理完成后（finally块）清理UserContext，避免ThreadLocal污染线程 -->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>io.github.fantasticname.mybilibili.filter.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
     <!-- ==================== IoC容器初始化监听器 ==================== -->
     <!-- Web应用启动时初始化IoC容器，扫描包、创建Bean、注入依赖 -->
     <listener>

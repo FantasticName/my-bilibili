@@ -75,6 +75,17 @@ public class UserContext {
     }
 
     /**
+     * 获取当前线程绑定的User对象（可空）
+     *
+     * <p>与get()相同，语义上更明确表示返回值可能为null。</p>
+     *
+     * @return 当前登录用户，如果未登录则返回null
+     */
+    public static User getNullable() {
+        return USER_HOLDER.get();
+    }
+
+    /**
      * 清除当前线程绑定的User对象
      *
      * <p>请求处理完成后必须调用此方法！</p>

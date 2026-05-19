@@ -54,6 +54,12 @@ out/
 # IDE - VS Code
 .vscode/
 
+
+
+# IDE - Trae
+.trae/
+
+
 # IDE - Eclipse (可选)
 .classpath
 .project
@@ -89,5 +95,30 @@ application-local.yml
 application-dev.yml
 application-test.yml
 
+# Sensitive config files (contain passwords, secrets, etc.)
+# Use *.template files instead, which only contain key names without real values
+env.properties
+db.properties
+
 
 .m2repo/
+
+uploads/
+*.jpg
+*.png
+*.gif
+*.jpeg
+*.webp
+*.svg
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.mp3
+*.wav
+*.avif
+
+
+PROJECT_OVERVIEW.md
+restart-backend.bat
+更新日志.md

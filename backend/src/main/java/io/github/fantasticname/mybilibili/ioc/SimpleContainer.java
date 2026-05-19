@@ -191,13 +191,24 @@ public class SimpleContainer {
      * @param bean 需要注入依赖的Bean实例
      */
     private void injectDependencies(Object bean) {
-        // 1. 获取Bean对象的所有字段（包括private字段）
-        //    getDeclaredFields() 返回该类声明的所有字段，不包括继承的
-        Field[] fields = bean.getClass().getDeclaredFields();
-        log.debug("检查Bean {} 的依赖，共 {} 个字段", bean.getClass().getSimpleName(), fields.length);
+        // 1. 获取Bean对象及其所有父类的字段（包括private字段）
+        //    getDeclaredFields() 只返回当前类声明的字段，不包括继承的
+        //    所以需要沿着继承链向上遍历，确保父类的@Autowired字段也能被注入
+        List<Field> allFields = new ArrayList<>();
+        Class<?> currentClass = bean.getClass();
+
+        // 一直往上找父类， 直到Object停止
+        while (currentClass != null && currentClass != Object.class) {
+            Field[] declaredFields = currentClass.getDeclaredFields();
+            for (Field field : declaredFields) {
+                allFields.add(field);
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+        log.debug("检查Bean {} 的依赖，共 {} 个字段（含继承）", bean.getClass().getSimpleName(), allFields.size());
 
         // 2. 遍历每个字段
-        for (Field field : fields) {
+        for (Field field : allFields) {
             // 2.1 检查字段上是否有 @Autowired 注解
             if (field.isAnnotationPresent(Autowired.class)) {
                 // 2.2 获取字段的类型，比如 UserMapper

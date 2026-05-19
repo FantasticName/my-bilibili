@@ -34,4 +34,18 @@ public @interface RequestParam {
      * @return 参数名
      */
     String value() default "";
+
+    /**
+     * 是否必须，默认为true
+     *
+     * @return 是否必须
+     */
+    boolean required() default true;
+
+    /**
+     * 默认值，当参数不存在时使用
+     *
+     * @return 默认值
+     */
+    String defaultValue() default "";
 }

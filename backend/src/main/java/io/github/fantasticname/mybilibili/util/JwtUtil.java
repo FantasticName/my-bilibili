@@ -8,8 +8,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * JWT工具类，提供令牌的生成和解析功能
@@ -41,11 +44,40 @@ public class JwtUtil {
     /**
      * JWT签名密钥
      *
-     * <p>密钥用于对JWT进行签名和验证。在实际生产环境中，
-     * 密钥应该从配置文件中读取，不应该硬编码在代码中。
-     * 这里使用一个固定的密钥字符串，仅用于开发环境。</p>
+     * <p>密钥用于对JWT进行签名和验证。优先从环境变量 JWT_SECRET 读取，
+     * 其次从 env.properties 文件的 jwt.secret 配置项读取，
+     * 这样可以避免密钥硬编码在源码中被提交到版本库。</p>
      */
-    private static final String SECRET_KEY = "my-bilibili-secret-key-for-jwt-token-signature-2024";
+    private static final String SECRET_KEY;
+
+    /**
+     * 静态初始化块，在类加载时从配置文件或环境变量读取JWT密钥
+     */
+    static {
+        // 优先从环境变量读取JWT密钥
+        String envSecret = System.getenv("JWT_SECRET");
+        if (envSecret != null && !envSecret.isEmpty()) {
+            SECRET_KEY = envSecret;
+            log.info("JWT密钥已从环境变量加载");
+        } else {
+            // 回退到env.properties配置文件
+            Properties props = new Properties();
+            try (InputStream is = JwtUtil.class.getClassLoader().getResourceAsStream("env.properties")) {
+                if (is != null) {
+                    props.load(is);
+                }
+            } catch (IOException e) {
+                log.warn("读取env.properties失败: {}", e.getMessage());
+            }
+            String propSecret = props.getProperty("jwt.secret");
+            if (propSecret != null && !propSecret.isEmpty()) {
+                SECRET_KEY = propSecret;
+                log.info("JWT密钥已从配置文件加载");
+            } else {
+                throw new RuntimeException("JWT密钥未配置：请设置环境变量 JWT_SECRET 或在 env.properties 中配置 jwt.secret");
+            }
+        }
+    }
 
     /**
      * JWT令牌过期时间（毫秒）
@@ -134,6 +166,36 @@ public class JwtUtil {
             // 3. 抛出业务异常，表示未登录
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "无效的登录凭证");
         }
+    }
+
+    /**
+     * 生成JWT令牌（不设exp过期时间，依靠Redis TTL控制过期）
+     *
+     * <p>与generateToken的区别：此方法不设置exp字段，
+     * 令牌本身不会过期，主要依靠Redis的TTL来控制会话有效期。</p>
+     *
+     * @param claims 自定义声明，如 {"userId": 123, "role": 0}
+     * @return 生成的JWT令牌字符串
+     */
+    public static String generateTokenWithoutExp(Map<String, Object> claims) {
+        log.debug("开始生成JWT令牌(无过期时间), claims={}", claims);
+
+        // 1. 获取当前时间，作为签发时间
+        Date now = new Date();
+
+        // 2. 构建JWT令牌（不设置过期时间）
+        String token = Jwts.builder()
+                // 2.1 设置自定义声明（Payload中的数据）
+                .setClaims(claims)
+                // 2.2 设置签发时间
+                .setIssuedAt(now)
+                // 2.3 使用密钥和HS256算法进行签名
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                // 2.4 编码为字符串
+                .compact();
+
+        log.info("JWT令牌生成成功(无过期时间)");
+        return token;
     }
 
     /**

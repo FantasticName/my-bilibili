@@ -56,6 +56,13 @@
             <version>2.15.3</version>
         </dependency>
 
+        <!-- Jackson JSR310: 支持 Java 8 时间类型（如 LocalDateTime）的序列化 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+
         <!-- JJWT: JWT令牌生成与解析，用于用户登录鉴权 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -69,6 +76,101 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
         </dependency>
+
+        <!-- MySQL Connector/J: MySQL JDBC驱动，用于连接MySQL数据库 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- BCrypt: 密码加密库，BCrypt内部自动生成盐值，无需单独存储salt字段 -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!-- Jedis: Redis Java客户端，用于缓存用户登录状态和Token -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.4.3</version>
+        </dependency>
+
+        <!-- Redisson: Redis分布式锁框架，提供RLock/看门狗自动续期/可重入锁 -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.25.0</version>
+        </dependency>
+
+        <!-- RocketMQ Client: 消息队列，提供事务消息/异步解耦/削峰填谷 -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <version>5.1.4</version>
+        </dependency>
+
+        <!-- Sentinel Core: 流量控制与熔断降级，提供QPS限流/熔断/系统保护 -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-core</artifactId>
+            <version>1.8.6</version>
+        </dependency>
+
+        <!-- Sentinel Transport: Sentinel与控制台通信（Dashboard监控） -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-transport-simple-http</artifactId>
+            <version>1.8.6</version>
+        </dependency>
+
+        <!-- Guava: Google工具库，提供BloomFilter布隆过滤器/RateLimiter限速器 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.1.3-jre</version>
+        </dependency>
+
+        <!-- Caffeine: 高性能本地缓存，用于Feed流大V发件箱缓存 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
+        </dependency>
+
+        <!-- WebSocket API: Tomcat原生支持，用于实时推送通知 -->
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JUnit 5: 单元测试框架 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito: Mock框架，用于模拟依赖 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.8.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito JUnit 5 扩展 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.8.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -79,6 +181,25 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
+            </plugin>
+
+            <!-- Tomcat 7 Maven Plugin: 本地启动Web容器，支持Servlet 3.0+ -->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <path>/</path>
+                    <port>8080</port>
+                    <uriEncoding>UTF-8</uriEncoding>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Surefire Plugin: 运行单元测试，支持JUnit 5 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.3</version>
             </plugin>
         </plugins>
     </build>

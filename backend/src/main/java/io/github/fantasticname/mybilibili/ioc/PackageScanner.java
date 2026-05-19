@@ -82,7 +82,15 @@ public class PackageScanner {
                 if ("file".equals(protocol)) {
                     // 文件系统协议：开发环境，.class文件在target/classes目录下
                     log.debug("使用文件系统扫描模式");
-                    File directory = new File(url.getFile());
+                    File directory;
+                    try {
+                        // ✅ 使用 toURI() 自动解码，处理空格和中文路径
+                        directory = new File(url.toURI());
+                    } catch (java.net.URISyntaxException e) {
+                        // 降级处理：手动解码（以防万一）
+                        String decodedPath = java.net.URLDecoder.decode(url.getFile(), "UTF-8");
+                        directory = new File(decodedPath);
+                    }
                     scanDirectory(directory, basePackage, classList);
                 } else if ("jar".equals(protocol)) {
                     // jar协议：打包后的环境，.class文件在jar包内
